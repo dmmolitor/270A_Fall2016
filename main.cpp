@@ -609,11 +609,11 @@ void Algorithm_3_Test(){
   R << 1,0,0,0,1,0,0,0,1;
   int it = 0;
   int max_it = 1000;
-  float tol = .0001;
+  float tol = .0001; // WHAT IS A REASONABLE TOL?
   float denom;
     Eigen::Vector2f v;
   //Note max(|S21 − S12|, |S31 − S13|, |S32 − S23|) considered
-  while (it<max_it&&max(abs(S(3)-S(1)),max(abs(S(6)-S(2)),abs(S(7)-S(5))))>tol){
+  while (it<max_it && max(abs(S(3)-S(1)),max(abs(S(6)-S(2)),abs(S(7)-S(5))))>tol){
     for (size_t j = 1; j < 3; j++) {
       for (size_t i = 0; i < j; i++) {
         v << S(3*i+i)+ S(3*j+j),S(3*i+j)-S(3*j+i);
@@ -624,27 +624,6 @@ void Algorithm_3_Test(){
         //denom = sqrt(pow(S(3*i+i)+S(3*j+j),2)+pow(S(3*i+j)-S(3*j+i),2));
         //S(3*i+j) = (temp(3*i+i)*temp(3*i+j)+temp(3*j+j)*temp(S(3*j+i)))/denom;
         cout << "iter: " << it << endl;
-        cout << "i: " << i << " j: " << j << endl;
-        cout << "R" << endl;
-        cout << R << endl;
-        cout << "S" << endl;
-        cout << S << endl;
-
-        /**v << S(3),S(1);
-        G.makeGivens(v.x(), v.y());
-        R.applyOnTheRight(0, 1, G);
-        /**S(0) = (S(0)*S(0)+S(0)*S(4)-S(3)*S(1)+S(4)*S(4))
-        ;
-        S(4) = ;
-        S(1)
-        S(3) = S(1);
-        v << S(6),S(2);
-        G.makeGivens(v.x(), v.y());
-        R.applyOnTheLeft(0, 2, G.adjoint());
-        v << S(7),S(5);
-        G.makeGivens(v.x(), v.y());
-        R.applyOnTheLeft(1, 2, G.adjoint());
-        */
       }
     }
     it += 1;
