@@ -419,14 +419,251 @@ void runBenchmark()
     }
 }
 
-void Algorithm_2_Test(){
 
-  
+void Algorithm_2_Test(){
+    /** Pseudocode
+    1) C = F^T F
+    2) V_hat, Sigma_hat ^2 = Jacobi(C)
+    3) sigma_i_hat = sqrt(sigma_i_hat^2)
+    4) sort sigma_i_hats and swap rows of V_hat accordingly to get Sigma_bar, V_bar
+    5) A = FV_bar
+    6) Givens
+    7) Flip signs / swap cols
+    */
+
+    // CONVERT JACOBI AND GIVENS INTO separate FUNCTIONS?????!!!!!
+    Eigen::Matrix<float, 2, 2> F,C,V_hat,A,QT, U,temp;
+    //float sigma_i_hats[2] = {};
+    F<<    1.2500,    0.4330,  0.4330,    1.7500;
+    //cout << F << endl;
+    //1) C = F^T F
+    C=F.transpose()*F;
+    cout << "C" << C << endl;
+    //Id << 1,0,0,1;
+
+    //2) Compute V_hat, Sigma_hat ^2 = Jacobi(C) (using Jacobi rotation)
+    // DO WE NEED TO WRITE OR OWN OR USE YOURS?
+    float tau;
+    float t;
+    float c;
+    float s;
+    // Find c and s
+    if(abs(C(1))==0){ // Do the Jacobi rotation (off-diag nonzero)
+      V_hat << 1,0,0,1;
+    }
+    else{
+      tau = (C(3)-C(0))/(2);//*abs(C(1)));
+      if (tau > 0) { // Choose tau as small as possible
+        t = C(1)/(tau+sqrt(tau*tau+C(1)*C(1)));//t = 1/(tau+sqrt(1+tau*tau));
+      }
+      else{
+        t = C(1)/(tau-sqrt(tau*tau+C(1)*C(1)));//t = 1/(abs(tau) - sqrt(1+tau*tau));
+      }
+      c = 1/sqrt((1+t*t));
+      s = -t*c;
+      V_hat << c, -s,s,c;
+      C = V_hat.transpose()*C*V_hat;
+      cout << "test" << endl;
+      cout << C << endl;
+    }
+    //float sigma1 = c*c*C(0)-2*c*s*C(1)+s*s*C(3); DOESN'T MAKE ANY SENSE HERE SINCE C REDEFINED
+    //float sigma2 = s*s*C(0)+2*c*s*C(1)+c*c*C(3);
+
+    //cout << "Sigma_hat^2 " << C << endl; // REMOVE LATER
+    //cout << "c: " << c << " s: " << s << endl;
+    //cout << "V_hat: " << V_hat << endl;
+
+    /**Eigen::JacobiRotation<float> r(2,2); // Initialize Jacobi rotation
+    // Write your own!!!!
+    r.makeJacobi(C(0),C(1),C(3));
+    C.applyOnTheLeft(0,1,r.transpose());
+    C.applyOnTheRight(0,1,r); // Now C = Sigma_hat^2
+
+
+    cout << "Sigma_hat^2 " << C << endl; // REMOVE LATER
+    //Calculate V_hat: V_hat is given by the following lines
+    V_hat << 1,0,0,1;
+    V_hat.applyOnTheRight(0,1,r);
+    */
+    //cout << "FIrst V_hat " << V_hat << endl;
+
+
+    //3/4) sigma_i_hat = sqrt(sigma_i_hat^2), sort and adjust V_hat!
+    bool V_det_Neg = false;
+    Eigen::Matrix<float, 2, 1> sigma_i_hats;
+    if (C(0)>C(3)) { // Note: these are necessarily non-negative
+      C << sqrt(C(0)),0,0, sqrt(C(3));
+    } else { // We have a non-trivial sort and need to change V_hat
+      float sig_temp = sqrt(C(0));
+      C << sqrt(C(3)),0,0, sig_temp;
+      V_det_Neg = true;
+      V_hat<< -s,c,c,s;
+    }
+    //cout << "sigma_i_hats" << sigma_i_hats << endl;
+
+    //cout << "V_hat " << V_hat << endl;
+
+    //5) A = FV_bar
+    A = F*V_hat;// Is this correct?
+    //A << 1.05878, 1.9695, 1.54152, 4.75644;
+
+    cout << "A" << endl;
+    cout << A << endl;
+
+    //6) Givens: A = QR
+    //Eigen::JacobiRotation<float> r2(0, 1); // Initialize Jacobi rotation
+    //r.makeGivens(A(0),A(2),&sigma_i_hats(0));// FIX!!!! What does the last input do?
+    // Doesn't this need the last input somehow? Makes no sense!!!
+    //float t;
+    float d = pow(A(0),2)+pow(A(1),2);
+    c = 1;
+    s = 0;
+    if (d != 0) {
+      t = sqrt(d);
+      c = A(0)/t;
+      s = -A(1)/t;
+    }
+    QT << c, -s, s, c;
+
+    cout << "QT"  << endl;
+    cout << QT << endl;
+    //bool signCheck = ((Q*A)(3))>0;
+    cout << "QT*A: "  << endl;
+    cout <<  QT*A << endl;
+
+    //6) Create U
+    //float sign = pow(-1,((sigma2)>0)+1);
+    temp = QT*A;
+    bool U_det_Neg = (temp(3)<0);
+    cout << "det U neg?" <<temp(3)<< " " << U_det_Neg <<endl;
+    float sign = pow(-1,U_det_Neg);
+    cout << sign <<endl;
+    U << QT(0), QT(2), sign*(QT(1)), sign*(QT(3));
+    // A = Q'R implies Q'A = R
+    //U = (Q*A)*V_hat;
+
+    cout << "U" << endl;
+    cout << U << endl;
+
+
+
+    //7) Flip signs / swap cols
+
+
+    cout << "Pre Check: "<< endl;
+    cout <<  U*C*V_hat.transpose() << endl;
+    cout << "V_hat: "<< endl;
+    cout <<  V_hat << endl;
+    cout << "U: "<< endl;
+    cout <<  U << endl;
+
+    if (F(0)*F(3)-F(1)*F(2)<0) {
+      C(3) = -C(3);
+      if (U_det_Neg) {
+        cout << "U col sign flip" << endl;
+        U(2) = -U(2);
+        U(3) = -U(3);
+      } else {
+        cout << "V col sign flip" << endl;
+        V_hat(2) = -V_hat(2);
+        V_hat(3) = -V_hat(3);
+      }
+    }
+    else{// i.e. det(F)>=0
+      if (U_det_Neg && V_det_Neg) {
+        cout << "U col sign flip" << endl;
+        U(2) = -U(2);
+        U(3) = -U(3);
+        cout << "V col sign flip" << endl;
+        V_hat(2) = -V_hat(2);
+        V_hat(3) = -V_hat(3);
+      }
+    }
+
+    cout << "Check: "<< endl;
+    cout <<  U*C*V_hat.transpose() << endl;
+    cout << "V_hat: "<< endl;
+    cout <<  V_hat << endl;
+    cout << "U: "<< endl;
+    cout <<  U << endl;
+    cout << "F" << endl;
+    cout << F << endl;
+    // Seems to be working - Still need to clean up and test.
+
+
+}
+
+
+
+/** Computes the polar decomposition of F=RS F 3x3 real matrix, using algorithm
+3.
+*/
+void Algorithm_3_Test(){
+  /**
+  */
+
+  Eigen::Matrix<float, 3, 3> F,R,S, temp;
+    Eigen::JacobiRotation<float> G; // Initialize Givens rotation
+  F << 1,2,3,4,5,6,7,8,9;
+  S = F;
+  R << 1,0,0,0,1,0,0,0,1;
+  int it = 0;
+  int max_it = 1000;
+  float tol = .0001;
+  float denom;
+    Eigen::Vector2f v;
+  //Note max(|S21 − S12|, |S31 − S13|, |S32 − S23|) considered
+  while (it<max_it&&max(abs(S(3)-S(1)),max(abs(S(6)-S(2)),abs(S(7)-S(5))))>tol){
+    for (size_t j = 1; j < 3; j++) {
+      for (size_t i = 0; i < j; i++) {
+        v << S(3*i+i)+ S(3*j+j),S(3*i+j)-S(3*j+i);
+        G.makeGivens(v.x(), v.y());
+        R.applyOnTheRight(i,j, G);
+        S.applyOnTheLeft(i,j,G.adjoint());
+        //temp = S;
+        //denom = sqrt(pow(S(3*i+i)+S(3*j+j),2)+pow(S(3*i+j)-S(3*j+i),2));
+        //S(3*i+j) = (temp(3*i+i)*temp(3*i+j)+temp(3*j+j)*temp(S(3*j+i)))/denom;
+        cout << "iter: " << it << endl;
+        cout << "i: " << i << " j: " << j << endl;
+        cout << "R" << endl;
+        cout << R << endl;
+        cout << "S" << endl;
+        cout << S << endl;
+
+        /**v << S(3),S(1);
+        G.makeGivens(v.x(), v.y());
+        R.applyOnTheRight(0, 1, G);
+        /**S(0) = (S(0)*S(0)+S(0)*S(4)-S(3)*S(1)+S(4)*S(4))
+        ;
+        S(4) = ;
+        S(1)
+        S(3) = S(1);
+        v << S(6),S(2);
+        G.makeGivens(v.x(), v.y());
+        R.applyOnTheLeft(0, 2, G.adjoint());
+        v << S(7),S(5);
+        G.makeGivens(v.x(), v.y());
+        R.applyOnTheLeft(1, 2, G.adjoint());
+        */
+      }
+    }
+    it += 1;
+  }
+  if(it==max_it){
+    cout << "MAXIMUM ITERATIONS REACHED BEFORE DESIRED TOLERANCE" << endl;
+  }
+  cout << "iter: " << it << endl;
+  cout << "R" << R << endl;
+  cout << "S" << S << endl;
+  cout << "R*S" << R*S << endl;
+
 
 }
 
 int main()
 {
+    Algorithm_2_Test();
+    Algorithm_3_Test();
     bool run_benchmark = true;
     if (run_benchmark) runBenchmark();
 }
