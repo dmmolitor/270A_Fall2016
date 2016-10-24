@@ -421,6 +421,7 @@ void runBenchmark()
     }
 }
 
+template<typename T>
 void Algorithm_2_Test(){
     /** Pseudocode
     1) C = F^T F
@@ -432,8 +433,7 @@ void Algorithm_2_Test(){
     7) Flip signs / swap cols
     */
 
-    // CONVERT JACOBI AND GIVENS INTO separate FUNCTIONS?????!!!!!
-    Eigen::Matrix<float, 2, 2> F,C,V_hat,A,QT, U,temp;
+    Eigen::Matrix<T, 2, 2> F,C,V_hat,A,QT, U,temp;
     //float sigma_i_hats[2] = {};
     F<<    1.2500,    0.4330,  0.4330,    1.7500;
     //cout << F << endl;
@@ -443,11 +443,10 @@ void Algorithm_2_Test(){
     //Id << 1,0,0,1;
 
     //2) Compute V_hat, Sigma_hat ^2 = Jacobi(C) (using Jacobi rotation)
-    // DO WE NEED TO WRITE OR OWN OR USE YOURS?
-    float tau;
-    float t;
-    float c;
-    float s;
+    T tau;
+    T t;
+    T c;
+    T s;
     // Find c and s
     if(abs(C(1))==0){ // Do the Jacobi rotation (off-diag nonzero)
       V_hat << 1,0,0,1;
@@ -491,11 +490,11 @@ void Algorithm_2_Test(){
 
     //3/4) sigma_i_hat = sqrt(sigma_i_hat^2), sort and adjust V_hat!
     bool V_det_Neg = false;
-    Eigen::Matrix<float, 2, 1> sigma_i_hats;
+    Eigen::Matrix<T, 2, 1> sigma_i_hats;
     if (C(0)>C(3)) { // Note: these are necessarily non-negative
       C << sqrt(C(0)),0,0, sqrt(C(3));
     } else { // We have a non-trivial sort and need to change V_hat
-      float sig_temp = sqrt(C(0));
+      T sig_temp = sqrt(C(0));
       C << sqrt(C(3)),0,0, sig_temp;
       V_det_Neg = true;
       V_hat<< -s,c,c,s;
@@ -516,7 +515,7 @@ void Algorithm_2_Test(){
     //r.makeGivens(A(0),A(2),&sigma_i_hats(0));// FIX!!!! What does the last input do?
     // Doesn't this need the last input somehow? Makes no sense!!!
     //float t;
-    float d = pow(A(0),2)+pow(A(1),2);
+    T d = pow(A(0),2)+pow(A(1),2);
     c = 1;
     s = 0;
     if (d != 0) {
@@ -537,7 +536,7 @@ void Algorithm_2_Test(){
     temp = QT*A;
     bool U_det_Neg = (temp(3)<0);
     cout << "det U neg?" <<temp(3)<< " " << U_det_Neg <<endl;
-    float sign = pow(-1,U_det_Neg);
+    T sign = pow(-1,U_det_Neg);
     cout << sign <<endl;
     U << QT(0), QT(2), sign*(QT(1)), sign*(QT(3));
     // A = Q'R implies Q'A = R
@@ -545,8 +544,6 @@ void Algorithm_2_Test(){
 
     cout << "U" << endl;
     cout << U << endl;
-
-
 
     //7) Flip signs / swap cols
     cout << "Pre Check: "<< endl;
@@ -588,8 +585,6 @@ void Algorithm_2_Test(){
     cout << "F" << endl;
     cout << F << endl;
     // Seems to be working - Still need to clean up and test.
-
-
 }
 
 
@@ -597,17 +592,18 @@ void Algorithm_2_Test(){
 /** Computes the polar decomposition of F=RS F 3x3 real matrix, using algorithm
 3.
 */
+template<typename T>
 void Algorithm_3_Test(){
 
-  Eigen::Matrix<float, 3, 3> F,R,S, temp;
-  Eigen::JacobiRotation<float> G; // Initialize Givens rotation
+  Eigen::Matrix<T, 3, 3> F,R,S, temp;
+  Eigen::JacobiRotation<T> G; // Initialize Givens rotation
   F << 4,3,4,56,2,3,7,3,8;
   S = F;
   R << 1,0,0,0,1,0,0,0,1; // Identity
   int it = 0;
   int max_it = 1000;
-  float tol = .0001;
-  //float denom;
+  T tol = .0001;
+  //T denom;
   Eigen::Vector2f v;
   //Note max(|S21 − S12|, |S31 − S13|, |S32 − S23|) considered
   while (it<max_it&&max(abs(S(3)-S(1)),max(abs(S(6)-S(2)),abs(S(7)-S(5))))>tol){
@@ -620,12 +616,6 @@ void Algorithm_3_Test(){
         //temp = S;
         //denom = sqrt(pow(S(3*i+i)+S(3*j+j),2)+pow(S(3*i+j)-S(3*j+i),2));
         //S(3*i+j) = (temp(3*i+i)*temp(3*i+j)+temp(3*j+j)*temp(S(3*j+i)))/denom;
-        cout << "iter: " << it << endl;
-        cout << "i: " << i << " j: " << j << endl;
-        cout << "R" << endl;
-        cout << R << endl;
-        cout << "S" << endl;
-        cout << S << endl;
 
         /**v << S(3),S(1);
         G.makeGivens(v.x(), v.y());
@@ -673,7 +663,7 @@ int main()
     //std::clock_t start;
     //double duration;
     //start = std::clock();
-    //Algorithm_2_Test();
+    //Algorithm_2_Test<float>();
     //duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
     //std::cout<<"printf: "<< duration<<'\n';
 
@@ -682,7 +672,7 @@ int main()
     bool run_benchmark = false;//CHANGE BACK TO TRUE
     if (run_benchmark) runBenchmark();
 
-    Algorithm_3_Test();
+    Algorithm_3_Test<float>();
     /**
     bool run_benchmark = true;
     if (run_benchmark) runBenchmark();
