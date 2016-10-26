@@ -421,6 +421,15 @@ void runBenchmark()
     }
 }
 
+
+void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,Eigen::Matrix2f& V){
+    //
+    //Compute the SVD of input F with sign conventions discussed in class and in assignment
+    //
+    //input: F
+    //output: U,sigma,V with F=U*sigma*V.transpose() and U*U.transpose()=V*V.transpose()=I;
+}
+
 template<typename T>
 void Algorithm_2_Test(){
     /** Pseudocode
@@ -655,8 +664,29 @@ void Givens_test(){
   cout << "Here is the vector v:" << endl << v << endl;
   v.applyOnTheLeft(0, 1, G.adjoint());
   cout << "Here is the vector J' * v:" << endl << v << endl;
+    
+}
+
+
+
+void My_Polar(const Eigen::Matrix3f& F,Eigen::Matrix3f& R,Eigen::Matrix3f& S){
+  //
+  //Compute the polar decomposition of input F (with det(R)=1)
+  //
+  //input: F
+  //output: R,s with F=R*S and R*R.transpose()=I and S=S.transpose()
 
 }
+
+// void Algorithm_2_Test(){
+//
+//   Eigen::Matrix2f F,C,U,V;
+//   F<<1,2,3,4;
+//   C=F*F.transpose();
+//   Eigen::Vector2f s2;
+//   JIXIE::Jacobi(C,s2,V);
+//
+// }
 
 int main()
 {
@@ -669,13 +699,10 @@ int main()
 
     //Givens_test();
 
-    bool run_benchmark = false;//CHANGE BACK TO TRUE
+    bool run_benchmark = false;
     if (run_benchmark) runBenchmark();
 
     Algorithm_3_Test<float>();
-    /**
-    bool run_benchmark = true;
-    if (run_benchmark) runBenchmark();
-    */
+    
 
 }
