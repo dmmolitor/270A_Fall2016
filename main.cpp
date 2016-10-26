@@ -428,6 +428,7 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     //
     //input: F
     //output: U,sigma,V with F=U*sigma*V.transpose() and U*U.transpose()=V*V.transpose()=I;
+
 }
 
 template<typename T>
@@ -513,16 +514,14 @@ void Algorithm_2_Test(){
     //cout << "V_hat " << V_hat << endl;
 
     //5) A = FV_bar
-    A = F*V_hat;// Is this correct?
-    //A << 1.05878, 1.9695, 1.54152, 4.75644;
+    A = F*V_hat;
 
     cout << "A" << endl;
     cout << A << endl;
 
     //6) Givens: A = QR
     //Eigen::JacobiRotation<float> r2(0, 1); // Initialize Jacobi rotation
-    //r.makeGivens(A(0),A(2),&sigma_i_hats(0));// FIX!!!! What does the last input do?
-    // Doesn't this need the last input somehow? Makes no sense!!!
+    //r.makeGivens(A(0),A(2),&sigma_i_hats(0));
     //float t;
     T d = pow(A(0),2)+pow(A(1),2);
     c = 1;
@@ -576,10 +575,10 @@ void Algorithm_2_Test(){
     }
     else{// i.e. det(F)>=0
       if (U_det_Neg && V_det_Neg) {
-        cout << "U col sign flip" << endl;
+        // "U col sign flip"
         U(2) = -U(2);
         U(3) = -U(3);
-        cout << "V col sign flip" << endl;
+        // "V col sign flip"
         V_hat(2) = -V_hat(2);
         V_hat(3) = -V_hat(3);
       }
@@ -601,17 +600,17 @@ void Algorithm_2_Test(){
 /** Computes the polar decomposition of F=RS F 3x3 real matrix, using algorithm
 3.
 */
-template<typename T>
-void Algorithm_3_Test(){
+//template<typename T>
+void My_Polar(const Eigen::Matrix3f& F,Eigen::Matrix3f& R,Eigen::Matrix3f& S){
 
-  Eigen::Matrix<T, 3, 3> F,R,S, temp;
-  Eigen::JacobiRotation<T> G; // Initialize Givens rotation
-  F << 4,3,4,56,2,3,7,3,8;
+  Eigen::Matrix<float, 3, 3> temp; // F,R,S
+  Eigen::JacobiRotation<float> G; // Initialize Givens rotation
+  //F << 4,3,4,56,2,3,7,3,8;
   S = F;
   R << 1,0,0,0,1,0,0,0,1; // Identity
   int it = 0;
   int max_it = 1000;
-  T tol = .0001;
+  float tol = .0001;
   //T denom;
   Eigen::Vector2f v;
   //Note max(|S21 − S12|, |S31 − S13|, |S32 − S23|) considered
@@ -622,25 +621,6 @@ void Algorithm_3_Test(){
         G.makeGivens(v.x(), v.y());
         R.applyOnTheRight(i,j, G);
         S.applyOnTheLeft(i,j,G.adjoint());
-        //temp = S;
-        //denom = sqrt(pow(S(3*i+i)+S(3*j+j),2)+pow(S(3*i+j)-S(3*j+i),2));
-        //S(3*i+j) = (temp(3*i+i)*temp(3*i+j)+temp(3*j+j)*temp(S(3*j+i)))/denom;
-
-        /**v << S(3),S(1);
-        G.makeGivens(v.x(), v.y());
-        R.applyOnTheRight(0, 1, G);
-        /**S(0) = (S(0)*S(0)+S(0)*S(4)-S(3)*S(1)+S(4)*S(4))
-        ;
-        S(4) = ;
-        S(1)
-        S(3) = S(1);
-        v << S(6),S(2);
-        G.makeGivens(v.x(), v.y());
-        R.applyOnTheLeft(0, 2, G.adjoint());
-        v << S(7),S(5);
-        G.makeGivens(v.x(), v.y());
-        R.applyOnTheLeft(1, 2, G.adjoint());
-        */
       }
     }
     it += 1;
@@ -649,13 +629,16 @@ void Algorithm_3_Test(){
     cout << "MAXIMUM ITERATIONS REACHED BEFORE DESIRED TOLERANCE" << endl;
   }
   cout << "iter: " << it << endl;
-  cout << "R" << R << endl;
-  cout << "S" << S << endl;
-  cout << "R*S" << R*S << endl;
+  cout << "R" << endl;
+  cout << R << endl;
+  cout << "S" << endl;
+  cout << S << endl;
+  cout << "R*S" << endl;
+  cout << R*S << endl;
 
 
 }
-
+/**
 void Givens_test(){
   Eigen::JacobiRotation<float> G; // Initialize Givens rotation
   Eigen::Vector2f v = Eigen::Vector2f::Random();
@@ -664,19 +647,19 @@ void Givens_test(){
   cout << "Here is the vector v:" << endl << v << endl;
   v.applyOnTheLeft(0, 1, G.adjoint());
   cout << "Here is the vector J' * v:" << endl << v << endl;
-    
-}
+
+}*/
 
 
 
-void My_Polar(const Eigen::Matrix3f& F,Eigen::Matrix3f& R,Eigen::Matrix3f& S){
+//void My_Polar(const Eigen::Matrix3f& F,Eigen::Matrix3f& R,Eigen::Matrix3f& S){
   //
   //Compute the polar decomposition of input F (with det(R)=1)
   //
   //input: F
   //output: R,s with F=R*S and R*R.transpose()=I and S=S.transpose()
 
-}
+//}
 
 // void Algorithm_2_Test(){
 //
@@ -690,19 +673,18 @@ void My_Polar(const Eigen::Matrix3f& F,Eigen::Matrix3f& R,Eigen::Matrix3f& S){
 
 int main()
 {
-    //std::clock_t start;
-    //double duration;
-    //start = std::clock();
-    //Algorithm_2_Test<float>();
-    //duration = (std::clock() - start)/ (double) CLOCKS_PER_SEC;
-    //std::cout<<"printf: "<< duration<<'\n';
+  Eigen::Matrix<float, 3, 3> F,R,S;
+  F << 1,2,3,4,5,6,7,8,9;
+  R << 0,0,0,0,0,0,0,0,0;
+  S << 0,0,0,0,0,0,0,0,0;
+  My_Polar(F,R,S);
 
-    //Givens_test();
+  //Givens_test();
 
-    bool run_benchmark = false;
-    if (run_benchmark) runBenchmark();
+  bool run_benchmark = false;
+  if (run_benchmark) runBenchmark();
 
-    Algorithm_3_Test<float>();
-    
+  //Algorithm_3_Test<float>();
+
 
 }
