@@ -440,7 +440,7 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     7) Flip signs / swap cols
     */
 
-    Eigen::Matrix<float, 2, 2> C,A,QT,temp;
+    Eigen::Matrix<float, 2, 2> C,A,QT;
     //1) C = F^T F
     C=F.transpose()*F;
     cout << "C" << C << endl;
@@ -507,10 +507,6 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     cout <<  QT*A << endl;
 
     //6) Create U
-    temp = QT*A;
-    cout << "QT*A" << endl;
-    cout << QT*A << endl;
-    cout << A(2)*QT(1) + A(3)*QT(3) << endl;
     bool U_det_Neg = ((A(2)*QT(1) + A(3)*QT(3))<0);// r22<0? (QT*A)(3)<0?
     //cout << "det U neg? " <<temp(3)<< " " << U_det_Neg <<endl;
     float sign = pow(-1,U_det_Neg);
