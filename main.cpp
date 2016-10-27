@@ -1,4 +1,5 @@
 /**
+Edited by Denali Molitor for Assignment 1 270A
 Copyright (c) 2016 Theodore Gast, Chuyuan Fu, Chenfanfu Jiang, Joseph Teran
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -429,10 +430,6 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     //input: F
     //output: U,sigma,V with F=U*sigma*V.transpose() and U*U.transpose()=V*V.transpose()=I;
 
-}
-
-template<typename T>
-void Algorithm_2_Test(){
     /** Pseudocode
     1) C = F^T F
     2) V_hat, Sigma_hat ^2 = Jacobi(C)
@@ -443,26 +440,24 @@ void Algorithm_2_Test(){
     7) Flip signs / swap cols
     */
 
-    Eigen::Matrix<T, 2, 2> F,C,V_hat,A,QT, U,temp;
-    //float sigma_i_hats[2] = {};
-    F<<    1.2500,    0.4330,  0.4330,    1.7500;
-    //cout << F << endl;
+    Eigen::Matrix<float, 2, 2> C,A,QT,temp;
     //1) C = F^T F
     C=F.transpose()*F;
     cout << "C" << C << endl;
-    //Id << 1,0,0,1;
 
-    //2) Compute V_hat, Sigma_hat ^2 = Jacobi(C) (using Jacobi rotation)
-    T tau;
-    T t;
-    T c;
-    T s;
+    //2) Compute V, Sigma_hat ^2 = Jacobi(C) (using Jacobi rotation)
+    float tau;
+    float t;
+    float c;
+    float s;
     // Find c and s
     if(abs(C(1))==0){ // Do the Jacobi rotation (off-diag nonzero)
-      V_hat << 1,0,0,1;
+      c = 1;
+      s = 0;
+      V << 1,0,0,1;
     }
     else{
-      tau = (C(3)-C(0))/(2);//*abs(C(1)));
+      tau = (C(3)-C(0))/(2);
       if (tau > 0) { // Choose tau as small as possible
         t = C(1)/(tau+sqrt(tau*tau+C(1)*C(1)));//t = 1/(tau+sqrt(1+tau*tau));
       }
@@ -471,17 +466,9 @@ void Algorithm_2_Test(){
       }
       c = 1/sqrt((1+t*t));
       s = -t*c;
-      V_hat << c, -s,s,c;
-      C = V_hat.transpose()*C*V_hat;
-      cout << "test" << endl;
-      cout << C << endl;
+      V << c, -s,s,c;
+      C = V.transpose()*C*V;
     }
-    //float sigma1 = c*c*C(0)-2*c*s*C(1)+s*s*C(3); DOESN'T MAKE ANY SENSE HERE SINCE C REDEFINED
-    //float sigma2 = s*s*C(0)+2*c*s*C(1)+c*c*C(3);
-
-    //cout << "Sigma_hat^2 " << C << endl; // REMOVE LATER
-    //cout << "c: " << c << " s: " << s << endl;
-    //cout << "V_hat: " << V_hat << endl;
 
     /**Eigen::JacobiRotation<float> r(2,2); // Initialize Jacobi rotation
     // Write your own!!!!
@@ -491,39 +478,41 @@ void Algorithm_2_Test(){
 
 
     cout << "Sigma_hat^2 " << C << endl; // REMOVE LATER
-    //Calculate V_hat: V_hat is given by the following lines
-    V_hat << 1,0,0,1;
-    V_hat.applyOnTheRight(0,1,r);
+    //Calculate V: V is given by the following lines
+    V << 1,0,0,1;
+    V.applyOnTheRight(0,1,r);
     */
-    //cout << "FIrst V_hat " << V_hat << endl;
+    //cout << "FIrst V " << V << endl;
 
 
-    //3/4) sigma_i_hat = sqrt(sigma_i_hat^2), sort and adjust V_hat!
+    //3/4) sigma_i_hat = sqrt(sigma_i_hat^2), sort and adjust V!
     bool V_det_Neg = false;
-    Eigen::Matrix<T, 2, 1> sigma_i_hats;
-    if (C(0)>C(3)) { // Note: these are necessarily non-negative
+    if (C(0)>=C(3)) { // Note: these are necessarily non-negative
       C << sqrt(C(0)),0,0, sqrt(C(3));
-    } else { // We have a non-trivial sort and need to change V_hat
-      T sig_temp = sqrt(C(0));
+    } else { // We have a non-trivial sort and need to change V
+      float sig_temp = sqrt(C(0));
       C << sqrt(C(3)),0,0, sig_temp;
       V_det_Neg = true;
-      V_hat<< -s,c,c,s;
+      cout << "Flip cols of V" << endl;
+      cout << "V: " << endl;
+      cout << V<< endl;
+      V<< -s,c,c,s;
+      cout << "V flipped: " <<  endl;
+      cout << V<< endl;
     }
-    //cout << "sigma_i_hats" << sigma_i_hats << endl;
-
-    //cout << "V_hat " << V_hat << endl;
 
     //5) A = FV_bar
-    A = F*V_hat;
+    A = F*V;
 
-    cout << "A" << endl;
-    cout << A << endl;
+    //cout << "A" << endl;
+    //cout << A << endl;
 
     //6) Givens: A = QR
-    //Eigen::JacobiRotation<float> r2(0, 1); // Initialize Jacobi rotation
-    //r.makeGivens(A(0),A(2),&sigma_i_hats(0));
+    //Eigen::JacobiRotation<float> G(0, 1); // Initialize Jacobi rotation
+    //Eigen::vector2f v;
+    //G.makeGivens(A(0),A(2));
     //float t;
-    T d = pow(A(0),2)+pow(A(1),2);
+    float d = pow(A(0),2)+pow(A(1),2);
     c = 1;
     s = 0;
     if (d != 0) {
@@ -542,56 +531,82 @@ void Algorithm_2_Test(){
     //6) Create U
     //float sign = pow(-1,((sigma2)>0)+1);
     temp = QT*A;
+    //A.applyOnTheLeft(0,1,G.adjoint());
+    //cout << "A" << endl;
+    //cout << A << endl;
     bool U_det_Neg = (temp(3)<0);
-    cout << "det U neg?" <<temp(3)<< " " << U_det_Neg <<endl;
-    T sign = pow(-1,U_det_Neg);
-    cout << sign <<endl;
-    U << QT(0), QT(2), sign*(QT(1)), sign*(QT(3));
-    // A = Q'R implies Q'A = R
-    //U = (Q*A)*V_hat;
+    cout << "det U neg? " <<temp(3)<< " " << U_det_Neg <<endl;
+    float sign = pow(-1,U_det_Neg);
+    U << QT(0), QT(1), sign*QT(2), sign*QT(3);
+    // A = Q*R implies Q'A = R
+    //U = (Q'*A)*V;
 
     cout << "U" << endl;
     cout << U << endl;
+    cout << C << "C" << endl;
 
     //7) Flip signs / swap cols
-    cout << "Pre Check: "<< endl;
-    cout <<  U*C*V_hat.transpose() << endl;
-    cout << "V_hat: "<< endl;
-    cout <<  V_hat << endl;
+    cout << "Pre Check: F"<< endl;
+    cout <<  U*C*V.transpose() << endl;
+    cout << "V: "<< endl;
+    cout <<  V << endl;
     cout << "U: "<< endl;
     cout <<  U << endl;
 
-    if (F(0)*F(3)-F(1)*F(2)<0) {
-      C(3) = -C(3);
+    if ((F(0)*F(3)-F(1)*F(2))<0) {
+      C(0) = -C(0);
       if (U_det_Neg) {
         cout << "U col sign flip" << endl;
         U(2) = -U(2);
         U(3) = -U(3);
       } else {
         cout << "V col sign flip" << endl;
-        V_hat(2) = -V_hat(2);
-        V_hat(3) = -V_hat(3);
+        V(2) = -V(2);
+        V(3) = -V(3);
       }
     }
     else{// i.e. det(F)>=0
       if (U_det_Neg && V_det_Neg) {
-        // "U col sign flip"
-        U(2) = -U(2);
-        U(3) = -U(3);
+        //"U col sign flip"
+        U(0) = -U(0);
+        U(1) = -U(1);
         // "V col sign flip"
-        V_hat(2) = -V_hat(2);
-        V_hat(3) = -V_hat(3);
+        V(0) = -V(0);
+        V(1) = -V(1);
+      }
+      else{
+        if ((F(0)*F(3)-F(1)*F(2))==0) {
+          if(V_det_Neg){
+            // "V col sign flip"
+            V(2) = -V(2);
+            V(3) = -V(3);
+          }
+          else {
+            if(U_det_Neg){
+              //"U col sign flip"
+              U(2) = -U(2);
+              U(3) = -U(3);
+            }
+          }
+        }
       }
     }
+    sigma = C;
 
-    cout << "Check: "<< endl;
-    cout <<  U*C*V_hat.transpose() << endl;
-    cout << "V_hat: "<< endl;
-    cout <<  V_hat << endl;
-    cout << "U: "<< endl;
-    cout <<  U << endl;
+    cout << "Check F: "<< endl;
+    cout <<  U*C*V.transpose() << endl;
     cout << "F" << endl;
     cout << F << endl;
+    cout << "sigma" << endl;
+    cout << sigma << endl;
+    cout << "V: "<< endl;
+    cout <<  V << endl;
+    cout << "detV: " << endl;
+    cout << V(0)*V(3)-V(1)*V(2) << endl;
+    cout << "U: "<< endl;
+    cout <<  U << endl;
+    cout << "detU: " << endl;
+    cout << U(0)*U(3)-U(1)*U(2) << endl;
     // Seems to be working - Still need to clean up and test.
 }
 
@@ -600,10 +615,10 @@ void Algorithm_2_Test(){
 /** Computes the polar decomposition of F=RS F 3x3 real matrix, using algorithm
 3.
 */
-//template<typename T>
+//late<typename T>
 void My_Polar(const Eigen::Matrix3f& F,Eigen::Matrix3f& R,Eigen::Matrix3f& S){
 
-  Eigen::Matrix<float, 3, 3> temp; // F,R,S
+  //Eigen::Matrix<float, 3, 3> ; // F,R,S
   Eigen::JacobiRotation<float> G; // Initialize Givens rotation
   //F << 4,3,4,56,2,3,7,3,8;
   S = F;
@@ -651,16 +666,6 @@ void Givens_test(){
 }*/
 
 
-
-//void My_Polar(const Eigen::Matrix3f& F,Eigen::Matrix3f& R,Eigen::Matrix3f& S){
-  //
-  //Compute the polar decomposition of input F (with det(R)=1)
-  //
-  //input: F
-  //output: R,s with F=R*S and R*R.transpose()=I and S=S.transpose()
-
-//}
-
 // void Algorithm_2_Test(){
 //
 //   Eigen::Matrix2f F,C,U,V;
@@ -674,17 +679,21 @@ void Givens_test(){
 int main()
 {
   Eigen::Matrix<float, 3, 3> F,R,S;
-  F << 1,2,3,4,5,6,7,8,9;
+  F << 0.8147,0.9134,0.2785,0.9058,0.6324,0.5469,0.1270,0.0975,0.9575;
   R << 0,0,0,0,0,0,0,0,0;
   S << 0,0,0,0,0,0,0,0,0;
   My_Polar(F,R,S);
 
-  //Givens_test();
+  Eigen::Matrix<float, 2, 2> F2,U,sigma,V;
+  F2 << 1,2,2,4;
+  U << 0,0,0,0;
+  sigma << 0,0,0,0;
+  V << 0,0,0,0;
+  My_SVD(F2,U,sigma,V);
 
   bool run_benchmark = false;
   if (run_benchmark) runBenchmark();
 
-  //Algorithm_3_Test<float>();
 
 
 }
