@@ -529,11 +529,7 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     cout <<  QT*A << endl;
 
     //6) Create U
-    //float sign = pow(-1,((sigma2)>0)+1);
     temp = QT*A;
-    //A.applyOnTheLeft(0,1,G.adjoint());
-    //cout << "A" << endl;
-    //cout << A << endl;
     bool U_det_Neg = (temp(3)<0);
     cout << "det U neg? " <<temp(3)<< " " << U_det_Neg <<endl;
     float sign = pow(-1,U_det_Neg);
@@ -685,7 +681,7 @@ int main()
   My_Polar(F,R,S);
 
   Eigen::Matrix<float, 2, 2> F2,U,sigma,V;
-  F2 << 1,2,2,4;
+  F2 <<  -3,-3,0,0;
   U << 0,0,0,0;
   sigma << 0,0,0,0;
   V << 0,0,0,0;
