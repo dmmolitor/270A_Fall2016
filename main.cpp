@@ -443,7 +443,6 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     Eigen::Matrix<float, 2, 2> C,A,QT;
     //1) C = F^T F
     C=F.transpose()*F;
-    cout << "C" << C << endl;
 
     //2) Compute V, Sigma_hat ^2 = Jacobi(C) (using Jacobi rotation)
     float tau;
@@ -482,7 +481,7 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
       cout << "Flip cols of V" << endl;
       cout << "V: " << endl;
       cout << V<< endl;
-      V<< -s,c,c,s;
+      V << -s,c,c,s;
       cout << "V flipped: " <<  endl;
       cout << V<< endl;
     }
@@ -500,7 +499,6 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
       s = -A(1)/t;
     }
     QT << c, -s, s, c;
-
     cout << "QT"  << endl;
     cout << QT << endl;
     cout << "QT*A: "  << endl;
@@ -508,7 +506,6 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
 
     //6) Create U
     bool U_det_Neg = ((A(2)*QT(1) + A(3)*QT(3))<0);// r22<0? (QT*A)(3)<0?
-    //cout << "det U neg? " <<temp(3)<< " " << U_det_Neg <<endl;
     float sign = pow(-1,U_det_Neg);
     U << QT(0), QT(1), sign*QT(2), sign*QT(3);
     // A = Q*R implies Q'A = R
@@ -518,12 +515,13 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     cout << U << endl;
 
     //7) Flip signs / swap cols
-    cout << "Pre Check: F"<< endl;
+    /**cout << "Pre Check: F"<< endl;
     cout <<  U*C*V.transpose() << endl;
     cout << "V: "<< endl;
     cout <<  V << endl;
     cout << "U: "<< endl;
     cout <<  U << endl;
+    */
 
     if ((F(0)*F(3)-F(1)*F(2))<0) {
       cout << C << "C" << endl;
@@ -569,7 +567,7 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
 
     cout << "Check F: "<< endl;
     cout <<  U*C*V.transpose() << endl;
-    cout << "F" << endl;
+    cout << "Real F: " << endl;
     cout << F << endl;
     cout << "sigma" << endl;
     cout << sigma << endl;
