@@ -470,20 +470,6 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
       C = V.transpose()*C*V;
     }
 
-    /**Eigen::JacobiRotation<float> r(2,2); // Initialize Jacobi rotation
-    // Write your own!!!!
-    r.makeJacobi(C(0),C(1),C(3));
-    C.applyOnTheLeft(0,1,r.transpose());
-    C.applyOnTheRight(0,1,r); // Now C = Sigma_hat^2
-
-
-    cout << "Sigma_hat^2 " << C << endl; // REMOVE LATER
-    //Calculate V: V is given by the following lines
-    V << 1,0,0,1;
-    V.applyOnTheRight(0,1,r);
-    */
-    //cout << "FIrst V " << V << endl;
-
 
     //3/4) sigma_i_hat = sqrt(sigma_i_hat^2), sort and adjust V!
     bool V_det_Neg = false;
@@ -504,14 +490,7 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     //5) A = FV_bar
     A = F*V;
 
-    //cout << "A" << endl;
-    //cout << A << endl;
-
     //6) Givens: A = QR
-    //Eigen::JacobiRotation<float> G(0, 1); // Initialize Jacobi rotation
-    //Eigen::vector2f v;
-    //G.makeGivens(A(0),A(2));
-    //float t;
     float d = pow(A(0),2)+pow(A(1),2);
     c = 1;
     s = 0;
@@ -524,14 +503,16 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
 
     cout << "QT"  << endl;
     cout << QT << endl;
-    //bool signCheck = ((Q*A)(3))>0;
     cout << "QT*A: "  << endl;
     cout <<  QT*A << endl;
 
     //6) Create U
     temp = QT*A;
-    bool U_det_Neg = (temp(3)<0);
-    cout << "det U neg? " <<temp(3)<< " " << U_det_Neg <<endl;
+    cout << "QT*A" << endl;
+    cout << QT*A << endl;
+    cout << A(2)*QT(1) + A(3)*QT(3) << endl;
+    bool U_det_Neg = ((A(2)*QT(1) + A(3)*QT(3))<0);// r22<0? (QT*A)(3)<0?
+    //cout << "det U neg? " <<temp(3)<< " " << U_det_Neg <<endl;
     float sign = pow(-1,U_det_Neg);
     U << QT(0), QT(1), sign*QT(2), sign*QT(3);
     // A = Q*R implies Q'A = R
@@ -539,7 +520,6 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
 
     cout << "U" << endl;
     cout << U << endl;
-    cout << C << "C" << endl;
 
     //7) Flip signs / swap cols
     cout << "Pre Check: F"<< endl;
@@ -550,15 +530,17 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     cout <<  U << endl;
 
     if ((F(0)*F(3)-F(1)*F(2))<0) {
+      cout << C << "C" << endl;
       C(0) = -C(0);
+      cout << C << "C" << endl;
       if (U_det_Neg) {
         cout << "U col sign flip" << endl;
-        U(2) = -U(2);
-        U(3) = -U(3);
+        U(0) = -U(0);
+        U(1) = -U(1);
       } else {
         cout << "V col sign flip" << endl;
-        V(2) = -V(2);
-        V(3) = -V(3);
+        V(0) = -V(0);
+        V(1) = -V(1);
       }
     }
     else{// i.e. det(F)>=0
@@ -603,7 +585,6 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     cout <<  U << endl;
     cout << "detU: " << endl;
     cout << U(0)*U(3)-U(1)*U(2) << endl;
-    // Seems to be working - Still need to clean up and test.
 }
 
 
@@ -611,18 +592,13 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
 /** Computes the polar decomposition of F=RS F 3x3 real matrix, using algorithm
 3.
 */
-//late<typename T>
 void My_Polar(const Eigen::Matrix3f& F,Eigen::Matrix3f& R,Eigen::Matrix3f& S){
-
-  //Eigen::Matrix<float, 3, 3> ; // F,R,S
   Eigen::JacobiRotation<float> G; // Initialize Givens rotation
-  //F << 4,3,4,56,2,3,7,3,8;
   S = F;
   R << 1,0,0,0,1,0,0,0,1; // Identity
   int it = 0;
   int max_it = 1000;
   float tol = .0001;
-  //T denom;
   Eigen::Vector2f v;
   //Note max(|S21 − S12|, |S31 − S13|, |S32 − S23|) considered
   while (it<max_it&&max(abs(S(3)-S(1)),max(abs(S(6)-S(2)),abs(S(7)-S(5))))>tol){
@@ -649,28 +625,6 @@ void My_Polar(const Eigen::Matrix3f& F,Eigen::Matrix3f& R,Eigen::Matrix3f& S){
 
 
 }
-/**
-void Givens_test(){
-  Eigen::JacobiRotation<float> G; // Initialize Givens rotation
-  Eigen::Vector2f v = Eigen::Vector2f::Random();
-  v << 1, 2;
-  G.makeGivens(v.x(), v.y());
-  cout << "Here is the vector v:" << endl << v << endl;
-  v.applyOnTheLeft(0, 1, G.adjoint());
-  cout << "Here is the vector J' * v:" << endl << v << endl;
-
-}*/
-
-
-// void Algorithm_2_Test(){
-//
-//   Eigen::Matrix2f F,C,U,V;
-//   F<<1,2,3,4;
-//   C=F*F.transpose();
-//   Eigen::Vector2f s2;
-//   JIXIE::Jacobi(C,s2,V);
-//
-// }
 
 int main()
 {
@@ -681,7 +635,7 @@ int main()
   My_Polar(F,R,S);
 
   Eigen::Matrix<float, 2, 2> F2,U,sigma,V;
-  F2 <<  -3,-3,0,0;
+  F2 <<  1,2,3,4;
   U << 0,0,0,0;
   sigma << 0,0,0,0;
   V << 0,0,0,0;
