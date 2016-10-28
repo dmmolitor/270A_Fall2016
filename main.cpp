@@ -478,12 +478,7 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
       float sig_temp = sqrt(C(0));
       C << sqrt(C(3)),0,0, sig_temp;
       V_det_Neg = true;
-      cout << "Flip cols of V" << endl;
-      cout << "V: " << endl;
-      cout << V<< endl;
       V << -s,c,c,s;
-      cout << "V flipped: " <<  endl;
-      cout << V<< endl;
     }
 
     //5) A = FV_bar
@@ -499,10 +494,6 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
       s = -A(1)/t;
     }
     QT << c, -s, s, c;
-    cout << "QT"  << endl;
-    cout << QT << endl;
-    cout << "QT*A: "  << endl;
-    cout <<  QT*A << endl;
 
     //6) Create U
     bool U_det_Neg = ((A(2)*QT(1) + A(3)*QT(3))<0);// r22<0? (QT*A)(3)<0?
@@ -511,8 +502,6 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     // A = Q*R implies Q'A = R
     //U = (Q'*A)*V;
 
-    cout << "U" << endl;
-    cout << U << endl;
 
     //7) Flip signs / swap cols
     /**cout << "Pre Check: F"<< endl;
@@ -525,16 +514,16 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
 
     if ((F(0)*F(3)-F(1)*F(2))<0) {
       cout << C << "C" << endl;
-      C(0) = -C(0);
+      C(3) = -C(3);
       cout << C << "C" << endl;
       if (U_det_Neg) {
         cout << "U col sign flip" << endl;
-        U(0) = -U(0);
-        U(1) = -U(1);
+        U(2) = -U(2);
+        U(3) = -U(3);
       } else {
         cout << "V col sign flip" << endl;
-        V(0) = -V(0);
-        V(1) = -V(1);
+        V(2) = -V(2);
+        V(3) = -V(3);
       }
     }
     else{// i.e. det(F)>=0
@@ -565,7 +554,7 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     }
     sigma = C;
 
-    cout << "Check F: "<< endl;
+    /*cout << "Check F: "<< endl;
     cout <<  U*C*V.transpose() << endl;
     cout << "Real F: " << endl;
     cout << F << endl;
@@ -578,7 +567,7 @@ void My_SVD(const Eigen::Matrix2f& F,Eigen::Matrix2f& U,Eigen::Matrix2f& sigma,E
     cout << "U: "<< endl;
     cout <<  U << endl;
     cout << "detU: " << endl;
-    cout << U(0)*U(3)-U(1)*U(2) << endl;
+    cout << U(0)*U(3)-U(1)*U(2) << endl;*/
 }
 
 
@@ -609,13 +598,14 @@ void My_Polar(const Eigen::Matrix3f& F,Eigen::Matrix3f& R,Eigen::Matrix3f& S){
   if(it==max_it){
     cout << "MAXIMUM ITERATIONS REACHED BEFORE DESIRED TOLERANCE" << endl;
   }
-  cout << "iter: " << it << endl;
+  /**cout << "iter: " << it << endl;
   cout << "R" << endl;
   cout << R << endl;
   cout << "S" << endl;
   cout << S << endl;
   cout << "R*S" << endl;
   cout << R*S << endl;
+  */
 
 
 }
@@ -629,7 +619,7 @@ int main()
   My_Polar(F,R,S);
 
   Eigen::Matrix<float, 2, 2> F2,U,sigma,V;
-  F2 <<  1,2,3,4;
+  F2 <<  0,0,0,1;
   U << 0,0,0,0;
   sigma << 0,0,0,0;
   V << 0,0,0,0;
